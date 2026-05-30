@@ -54,6 +54,234 @@ class InputHandler {
   }
 }
 
+// --- Web Audio 8-bit Synthesizer ---
+class AudioManager {
+  constructor() {
+    this.ctx = null;
+    this.bgmInterval = null;
+    this.isMuted = false;
+  }
+
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  playJump() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+    
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(650, this.ctx.currentTime + 0.15);
+    
+    gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.15);
+  }
+
+  playShoot() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = "square";
+    osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180, this.ctx.currentTime + 0.08);
+    
+    gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.005, this.ctx.currentTime + 0.08);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.08);
+  }
+
+  playCoin() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+    
+    const now = this.ctx.currentTime;
+    const playNote = (freq, start, duration) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.08, start);
+      gain.gain.exponentialRampToValueAtTime(0.005, start + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration);
+    };
+
+    // Fast 2-note digital chime
+    playNote(587.33, now, 0.07); // D5
+    playNote(880.00, now + 0.07, 0.15); // A5
+  }
+
+  playHitBlock() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.12);
+    
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.12);
+  }
+
+  playExplosion() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(100, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(20, this.ctx.currentTime + 0.25);
+    
+    gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+    
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(350, this.ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.25);
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.25);
+  }
+
+  playHurt() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(50, this.ctx.currentTime + 0.2);
+    
+    gain.gain.setValueAtTime(0.22, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.2);
+  }
+
+  playVictory() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const playNote = (freq, start, duration) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.06, start);
+      gain.gain.exponentialRampToValueAtTime(0.005, start + duration);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration);
+    };
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((n, i) => {
+      playNote(n, now + i * 0.1, 0.25);
+    });
+  }
+
+  startBGM() {
+    this.init();
+    if (this.isMuted || !this.ctx) return;
+    if (this.bgmInterval) return;
+
+    let beat = 0;
+    // Retro simple 8-bit loop tune
+    const melody = [
+      261.63, 293.66, 329.63, 349.23, 392.00, 392.00, 440.00, 392.00,
+      349.23, 329.63, 261.63, 293.66, 329.63, 329.63, 293.66, 293.66
+    ]; 
+    
+    const bass = [
+      130.81, 130.81, 164.81, 164.81, 196.00, 196.00, 196.00, 196.00,
+      174.61, 174.61, 164.81, 164.81, 146.83, 146.83, 130.81, 196.00
+    ]; 
+
+    this.bgmInterval = setInterval(() => {
+      if (this.isMuted || !this.ctx || this.ctx.state === "suspended") return;
+      
+      const now = this.ctx.currentTime;
+      const index = beat % melody.length;
+      
+      // Bass Oscillator
+      const bassOsc = this.ctx.createOscillator();
+      const bassGain = this.ctx.createGain();
+      bassOsc.type = "triangle";
+      bassOsc.frequency.setValueAtTime(bass[index], now);
+      bassGain.gain.setValueAtTime(0.08, now);
+      bassGain.gain.exponentialRampToValueAtTime(0.005, now + 0.22);
+      bassOsc.connect(bassGain);
+      bassGain.connect(this.ctx.destination);
+      bassOsc.start(now);
+      bassOsc.stop(now + 0.25);
+
+      // Melody Oscillator
+      if (beat % 2 === 0) {
+        const melOsc = this.ctx.createOscillator();
+        const melGain = this.ctx.createGain();
+        melOsc.type = "square";
+        melOsc.frequency.setValueAtTime(melody[index], now);
+        melGain.gain.setValueAtTime(0.02, now);
+        melGain.gain.exponentialRampToValueAtTime(0.002, now + 0.25);
+        melOsc.connect(melGain);
+        melGain.connect(this.ctx.destination);
+        melOsc.start(now);
+        melOsc.stop(now + 0.3);
+      }
+      
+      beat++;
+    }, 250);
+  }
+
+  stopBGM() {
+    if (this.bgmInterval) {
+      clearInterval(this.bgmInterval);
+      this.bgmInterval = null;
+    }
+  }
+}
+
 // --- Particle System ---
 class Particle {
   constructor(x, y, color, size, vx, vy, life, decay = 0.05) {
@@ -182,7 +410,7 @@ class GameMap {
     this.collectibles = [];
     this.portal = null;
     this.enemies = [];
-    this.blockBounces = []; // Array of active block bounce animations
+    this.blockBounces = []; 
 
     this.parseLayout();
   }
@@ -198,7 +426,7 @@ class GameMap {
         this.grid[r][c] = char;
 
         if (char === '*') {
-          this.grid[r][c] = ' '; // clear from grid, handle as entity
+          this.grid[r][c] = ' '; 
           this.collectibles.push({ x: x + 12, y: y + 12, width: 16, height: 16, type: 'coin', vx: 0, vy: 0, active: true });
         } else if (char === 'h') {
           this.grid[r][c] = ' ';
@@ -229,14 +457,15 @@ class GameMap {
     return this.grid[tileY][tileX] === '^';
   }
 
-  checkBlockHit(tileX, tileY, player, spawnParticles) {
+  checkBlockHit(tileX, tileY, player, spawnParticles, audio) {
     if (tileX < 0 || tileX >= this.cols || tileY < 0 || tileY >= this.rows) return;
     
     if (this.grid[tileY][tileX] === '?') {
-      // 1. Mark depleted
       this.grid[tileY][tileX] = 'D';
 
-      // 2. Trigger bounce
+      // Play Sound
+      if (audio) audio.playHitBlock();
+
       this.blockBounces.push({
         r: tileY,
         c: tileX,
@@ -245,7 +474,6 @@ class GameMap {
         maxOffset: -8
       });
 
-      // 3. Spawn bouncing resource item
       const itemType = Math.random() < 0.2 ? 'health' : 'coin';
       const itemWidth = itemType === 'health' ? 20 : 16;
       const itemHeight = itemType === 'health' ? 20 : 16;
@@ -260,11 +488,10 @@ class GameMap {
         height: itemHeight,
         type: itemType,
         vx: (Math.random() - 0.5) * 3,
-        vy: -6, // jump velocity
+        vy: -6, 
         active: true
       });
 
-      // 4. Sparkle particles
       spawnParticles(tileX * TILE_SIZE + TILE_SIZE / 2, tileY * TILE_SIZE + TILE_SIZE / 2, "#ffd700", 10, 4);
     }
   }
@@ -274,7 +501,7 @@ class GameMap {
       const b = this.blockBounces[i];
       b.offsetY += b.speed;
       if (b.speed < 0 && b.offsetY <= b.maxOffset) {
-        b.speed = 2; // reverse
+        b.speed = 2; 
       } else if (b.speed > 0 && b.offsetY >= 0) {
         b.offsetY = 0;
         this.blockBounces.splice(i, 1);
@@ -292,7 +519,6 @@ class GameMap {
 
         if (x + TILE_SIZE < camera.x || x > camera.x + camera.width) continue;
 
-        // Apply bounce offset if animating
         let offsetY = 0;
         const activeBounce = this.blockBounces.find(b => b.r === r && b.c === c);
         if (activeBounce) {
@@ -302,7 +528,6 @@ class GameMap {
         const renderY = y - camera.y + offsetY;
 
         if (char === '#') {
-          // Cyber Brick Style
           ctx.fillStyle = "#111827";
           ctx.fillRect(x - camera.x, renderY, TILE_SIZE, TILE_SIZE);
           ctx.strokeStyle = "rgba(0, 243, 255, 0.4)";
@@ -316,7 +541,6 @@ class GameMap {
           ctx.stroke();
 
         } else if (char === '?') {
-          // Glow Yellow Treasure Block
           const pulse = Math.abs(Math.sin(time * 0.08)) * 10;
           ctx.shadowBlur = 10 + pulse;
           ctx.shadowColor = "#ffd700";
@@ -326,7 +550,6 @@ class GameMap {
           ctx.lineWidth = 1.5;
           ctx.strokeRect(x - camera.x, renderY, TILE_SIZE, TILE_SIZE);
 
-          // Draw "?" mark
           ctx.shadowBlur = 0;
           ctx.fillStyle = "#ffffff";
           ctx.font = "bold 16px 'Orbitron', sans-serif";
@@ -334,19 +557,16 @@ class GameMap {
           ctx.fillText("?", x + TILE_SIZE / 2 - camera.x, renderY + TILE_SIZE / 2 + 6);
 
         } else if (char === 'D') {
-          // Depleted block: grey/dull blue
           ctx.fillStyle = "#1f2937";
           ctx.fillRect(x - camera.x, renderY, TILE_SIZE, TILE_SIZE);
           ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
           ctx.lineWidth = 1.5;
           ctx.strokeRect(x - camera.x, renderY, TILE_SIZE, TILE_SIZE);
 
-          // Draw small center dimple
           ctx.fillStyle = "rgba(100, 116, 139, 0.6)";
           ctx.fillRect(x + TILE_SIZE / 2 - 3 - camera.x, renderY + TILE_SIZE / 2 - 3, 6, 6);
 
         } else if (char === '^') {
-          // Neon Laser Spikes
           ctx.shadowBlur = 10;
           ctx.shadowColor = "#ff0055";
           ctx.fillStyle = "#ff0055";
@@ -365,7 +585,6 @@ class GameMap {
     }
     ctx.restore();
 
-    // Draw Collectibles
     this.collectibles.forEach(item => {
       if (!item.active) return;
       ctx.save();
@@ -398,7 +617,6 @@ class GameMap {
       ctx.restore();
     });
 
-    // Draw Portal
     if (this.portal) {
       ctx.save();
       const wave = Math.sin(time * 0.05) * 8;
@@ -454,7 +672,7 @@ class Player {
     this.ghostTrail = [];
   }
 
-  update(input, map, spawnParticles, spawnProjectile) {
+  update(input, map, spawnParticles, spawnProjectile, audio) {
     if (this.dashCooldown > 0) this.dashCooldown--;
     if (this.shootCooldown > 0) this.shootCooldown--;
     if (this.invulnFrames > 0) this.invulnFrames--;
@@ -501,7 +719,7 @@ class Player {
     const jumpPressed = input.isDown(" ") || input.isDown("w") || input.isDown("arrowup");
     if (jumpPressed) {
       if (!this.wasJumpPressed) {
-        this.jump();
+        this.jump(audio);
       }
       this.wasJumpPressed = true;
     } else {
@@ -510,51 +728,55 @@ class Player {
 
     const dashPressed = input.isDown("shift");
     if (dashPressed && this.dashCooldown === 0 && this.dashTimer === 0) {
-      this.dash();
+      this.dash(audio);
     }
 
     const shootPressed = input.isDown("f") || input.isDown("k");
     if (shootPressed && this.shootCooldown === 0) {
-      this.shoot(spawnProjectile);
+      this.shoot(spawnProjectile, audio);
     }
 
     this.vy += GRAVITY;
     if (this.vy > 12) this.vy = 12;
 
     this.moveX(this.vx, map);
-    this.moveY(this.vy, map, spawnParticles);
+    this.moveY(this.vy, map, spawnParticles, audio);
 
     const pxLeft = Math.floor(this.x / TILE_SIZE);
     const pxRight = Math.floor((this.x + this.width) / TILE_SIZE);
     const pyBottom = Math.floor((this.y + this.height) / TILE_SIZE);
 
     if (map.isSpike(pxLeft, pyBottom) || map.isSpike(pxRight, pyBottom)) {
-      this.takeDamage(20, spawnParticles);
+      this.takeDamage(20, spawnParticles, audio);
     }
   }
 
-  jump() {
+  jump(audio) {
     if (this.grounded) {
       this.vy = JUMP_FORCE;
       this.grounded = false;
       this.jumpCount = 1;
+      if (audio) audio.playJump();
     } else if (this.jumpCount < 2) {
       this.vy = JUMP_FORCE * 0.9;
       this.jumpCount = 2;
+      if (audio) audio.playJump();
     }
   }
 
-  dash() {
+  dash(audio) {
     this.dashTimer = DASH_DURATION;
     this.dashCooldown = DASH_CD;
+    if (audio) audio.playJump(); // Dash sweeps up
   }
 
-  shoot(spawnProjectile) {
+  shoot(spawnProjectile, audio) {
     this.shootCooldown = 15;
     spawnProjectile(this.x + (this.dashDir > 0 ? this.width : -10), this.y + this.height / 2 - 3, this.dashDir);
+    if (audio) audio.playShoot();
   }
 
-  takeDamage(amount, spawnParticles) {
+  takeDamage(amount, spawnParticles, audio) {
     if (this.invulnFrames > 0 || this.dashTimer > 0) return;
     this.hp = Math.max(0, this.hp - amount);
     this.invulnFrames = 40;
@@ -563,6 +785,7 @@ class Player {
     this.vx = -this.dashDir * 4;
 
     spawnParticles(this.x + this.width / 2, this.y + this.height / 2, "#ff0055", 6, 12);
+    if (audio) audio.playHurt();
   }
 
   moveX(vx, map) {
@@ -588,7 +811,7 @@ class Player {
     }
   }
 
-  moveY(vy, map, spawnParticles) {
+  moveY(vy, map, spawnParticles, audio) {
     this.y += vy;
     const tileX1 = Math.floor(this.x / TILE_SIZE);
     const tileX2 = Math.floor((this.x + this.width - 0.1) / TILE_SIZE);
@@ -609,9 +832,8 @@ class Player {
         this.y = (tileY + 1) * TILE_SIZE;
         this.vy = 0;
 
-        // Check hitting blocks from below
-        map.checkBlockHit(tileX1, tileY, this, spawnParticles);
-        map.checkBlockHit(tileX2, tileY, this, spawnParticles);
+        map.checkBlockHit(tileX1, tileY, this, spawnParticles, audio);
+        map.checkBlockHit(tileX2, tileY, this, spawnParticles, audio);
       }
     }
   }
@@ -660,6 +882,8 @@ class Game {
     this.ctx = this.canvas.getContext("2d");
     
     this.input = new InputHandler();
+    this.audio = new AudioManager();
+
     this.state = "START";
     this.time = 0;
 
@@ -676,6 +900,25 @@ class Game {
     document.getElementById("startButton").addEventListener("click", () => this.startGame());
     document.getElementById("restartButton").addEventListener("click", () => this.restartGame());
     document.getElementById("nextLevelButton").addEventListener("click", () => this.restartGame());
+
+    // Mute button setup
+    const muteBtn = document.getElementById("muteBtn");
+    muteBtn.addEventListener("click", () => {
+      this.audio.isMuted = !this.audio.isMuted;
+      if (this.audio.isMuted) {
+        muteBtn.innerText = "SOUND: OFF";
+        muteBtn.classList.remove("active");
+        this.audio.stopBGM();
+      } else {
+        muteBtn.innerText = "SOUND: ON";
+        muteBtn.classList.add("active");
+        if (this.state === "PLAYING") {
+          this.audio.startBGM();
+        }
+      }
+    });
+    // Set active style for sound on
+    muteBtn.classList.add("active");
   }
 
   initZoom() {
@@ -690,10 +933,11 @@ class Game {
     };
 
     const setZoom = (scale, type) => {
-      Object.values(buttons).forEach(btn => btn?.classList.remove("active"));
+      Object.keys(buttons).forEach(k => {
+        if (k !== 'muteBtn') buttons[k]?.classList.remove("active");
+      });
       buttons[type]?.classList.add("active");
 
-      // Clean up past listeners if changing zoom method
       if (this.resizeListener) {
         window.removeEventListener("resize", this.resizeListener);
         this.resizeListener = null;
@@ -721,7 +965,6 @@ class Game {
     buttons.zoom15?.addEventListener("click", () => setZoom(1.5, "zoom15"));
     buttons.zoomAuto?.addEventListener("click", () => setZoom("auto", "zoomAuto"));
 
-    // Set Default scale
     setZoom(1, "zoom1");
   }
 
@@ -736,6 +979,10 @@ class Game {
     this.particles = [];
 
     this.state = "PLAYING";
+
+    // Play BGM & Sound setup
+    this.audio.init();
+    this.audio.startBGM();
   }
 
   restartGame() {
@@ -749,6 +996,9 @@ class Game {
     document.getElementById("finalScore").innerText = this.player.score;
     document.getElementById("gameOverScreen").classList.remove("hidden");
     document.getElementById("gameOverScreen").classList.add("active");
+
+    this.audio.stopBGM();
+    this.audio.playHurt();
   }
 
   triggerVictory() {
@@ -756,6 +1006,9 @@ class Game {
     document.getElementById("victoryScore").innerText = this.player.score;
     document.getElementById("victoryScreen").classList.remove("hidden");
     document.getElementById("victoryScreen").classList.add("active");
+
+    this.audio.stopBGM();
+    this.audio.playVictory();
   }
 
   spawnParticles = (x, y, color, count = 5, spread = 3) => {
@@ -776,13 +1029,9 @@ class Game {
     if (this.state !== "PLAYING") return;
     this.time++;
 
-    // Player Update
-    this.player.update(this.input, this.map, this.spawnParticles, this.spawnProjectile);
-
-    // Update Block Animations
+    this.player.update(this.input, this.map, this.spawnParticles, this.spawnProjectile, this.audio);
     this.map.updateBounces();
 
-    // Fall death zone
     if (this.player.y > this.map.height) {
       this.player.hp = 0;
     }
@@ -792,12 +1041,10 @@ class Game {
       return;
     }
 
-    // Camera follow (Lerp)
     const targetCamX = this.player.x - this.camera.width / 2 + this.player.width / 2;
     this.camera.x += (targetCamX - this.camera.x) * 0.1;
     this.camera.x = Math.max(0, Math.min(this.camera.x, this.map.width - this.camera.width));
 
-    // Update Projectiles
     this.projectiles.forEach((p) => {
       p.update(this.map.width);
 
@@ -813,6 +1060,9 @@ class Game {
           p.active = false;
           enemy.hp--;
           this.spawnParticles(p.x, p.y, "#ffffff", 8, 3);
+          
+          if (this.audio) this.audio.playExplosion();
+
           if (enemy.hp <= 0) {
             this.player.score += 200;
             this.spawnParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color, 15, 6);
@@ -822,35 +1072,31 @@ class Game {
     });
     this.projectiles = this.projectiles.filter((p) => p.active);
 
-    // Update Enemies
     this.map.enemies.forEach((enemy) => {
       if (enemy.hp <= 0) return;
       enemy.update(this.map);
 
       if (this.rectIntersect(this.player, enemy)) {
-        this.player.takeDamage(15, this.spawnParticles);
+        this.player.takeDamage(15, this.spawnParticles, this.audio);
       }
     });
 
-    // Update Collectibles (including dynamic popping ones)
     this.map.collectibles.forEach((item) => {
       if (!item.active) return;
 
-      // Handle item physical movement if popped out of a block
       if (item.vx !== 0 || item.vy !== 0) {
-        item.vy += 0.3; // low gravity
+        item.vy += 0.3;
         item.x += item.vx;
         item.y += item.vy;
 
-        // Collision with map floor
         const cx1 = Math.floor(item.x / TILE_SIZE);
         const cx2 = Math.floor((item.x + item.width) / TILE_SIZE);
         const cy = Math.floor((item.y + item.height) / TILE_SIZE);
 
         if (this.map.isSolid(cx1, cy) || this.map.isSolid(cx2, cy)) {
           item.y = cy * TILE_SIZE - item.height;
-          item.vy = -item.vy * 0.4; // bounce dampening
-          item.vx *= 0.6; // slow down sliding
+          item.vy = -item.vy * 0.4;
+          item.vx *= 0.6;
           if (Math.abs(item.vy) < 1.0) {
             item.vy = 0;
             item.vx = 0;
@@ -860,6 +1106,9 @@ class Game {
 
       if (this.rectIntersect(this.player, item)) {
         item.active = false;
+        
+        if (this.audio) this.audio.playCoin();
+
         if (item.type === 'coin') {
           this.player.score += 100;
           this.spawnParticles(item.x + item.width / 2, item.y + item.height / 2, "#00f3ff", 8, 3);
