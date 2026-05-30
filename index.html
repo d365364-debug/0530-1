@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bbit Adventure - Neon Cyber Platformer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="game-container">
+    <!-- Header/Title -->
+    <header class="game-header">
+      <h1 class="glow-text">BBIT <span class="neon-purple">ADVENTURE</span></h1>
+    </header>
+
+    <!-- Zoom Control Panel -->
+    <div class="control-panel">
+      <span class="control-label font-title">VIEWPORT:</span>
+      <div class="zoom-buttons">
+        <button id="zoom1" class="zoom-btn active">1.0x</button>
+        <button id="zoom125" class="zoom-btn">1.25x</button>
+        <button id="zoom15" class="zoom-btn">1.5x</button>
+        <button id="zoomAuto" class="zoom-btn">AUTO FIT</button>
+      </div>
+    </div>
+
+    <!-- Game Stage Container (allows overflow scaling without overlap) -->
+    <div class="game-stage-wrapper">
+      <!-- Game Screen Wrapper -->
+      <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="800" height="480"></canvas>
+
+      <!-- Glassmorphic HUD overlay (can also be drawn in canvas, but overlay DOM gives a high-end web feel) -->
+      <div id="hud" class="hud-panel hidden">
+        <div class="hud-left">
+          <div class="hud-item">
+            <span class="label">CORE LIFE</span>
+            <div class="bar-container">
+              <div id="healthBar" class="bar health-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="hud-item">
+            <span class="label">DASH ENERGY</span>
+            <div class="bar-container">
+              <div id="dashBar" class="bar dash-bar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="hud-score">
+            <span class="label">DATA BITS</span>
+            <span id="scoreValue" class="value">00000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Start Screen Overlay -->
+      <div id="startScreen" class="overlay-screen active">
+        <div class="overlay-content">
+          <h2 class="glow-text-slow">READY PLAYER ONE</h2>
+          <p class="game-desc">引導發光位元 <strong>Bbit</strong> 逃離崩潰的賽博資料庫！</p>
+          <div class="controls-guide">
+            <h3>控制說明</h3>
+            <div class="keys">
+              <div class="key-row"><span class="key">A</span> / <span class="key">D</span> <span>左右移動</span></div>
+              <div class="key-row"><span class="key">Space</span> <span>跳躍 / 雙重跳躍</span></div>
+              <div class="key-row"><span class="key">Shift</span> <span>位元衝刺 (Dash)</span></div>
+              <div class="key-row"><span class="key">F</span> <span>發射光彈 (Shoot)</span></div>
+            </div>
+          </div>
+          <button id="startButton" class="neon-btn">START GAME</button>
+        </div>
+      </div>
+
+      <!-- Game Over Overlay -->
+      <div id="gameOverScreen" class="overlay-screen hidden">
+        <div class="overlay-content">
+          <h2 class="glow-text-red">SYSTEM CORRUPTED</h2>
+          <p>核心已斷電。Bbit 未能成功逃脫。</p>
+          <div class="stats-box">
+            <p>收集資料點數: <span id="finalScore" class="highlight">0</span></p>
+          </div>
+          <button id="restartButton" class="neon-btn red-btn">REBOOT SYSTEM</button>
+        </div>
+      </div>
+
+      <!-- Victory Screen Overlay -->
+      <div id="victoryScreen" class="overlay-screen hidden">
+        <div class="overlay-content">
+          <h2 class="glow-text-green">DATA UPLOAD COMPLETE</h2>
+          <p>成功抵達傳送門！資料庫已安全備份。</p>
+          <div class="stats-box">
+            <p>最終得分: <span id="victoryScore" class="highlight">0</span></p>
+          </div>
+          <button id="nextLevelButton" class="neon-btn green-btn">NEXT SYSTEM</button>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Controls info footer -->
+    <footer class="game-footer">
+      <p>Powered by HTML5 Canvas & AntiGravity Engine</p>
+    </footer>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
